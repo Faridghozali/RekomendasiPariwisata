@@ -10,7 +10,7 @@ from tensorflow.keras import layers
 # Load data
 place_df = pd.read_csv("https://raw.githubusercontent.com/khikisb/SistemRekomendasiWisata/main/tourism_with_id.csv")
 rating = pd.read_csv('https://raw.githubusercontent.com/khikisb/SistemRekomendasiWisata/main/tourism_rating.csv')
-user = pd.read_csv('https://raw.githubusercontent.com/khikisb/SistemRekomendasiWisata/main/user.csv')
+user = pd.read_csv('https://raw.githubusercontent.com/Faridghozali/RekomendasiPariwisata/main/user.csv')
 
 # Data preprocessing
 place_df = place_df.drop(['Unnamed: 11','Unnamed: 12', 'Time_Minutes'], axis=1)
