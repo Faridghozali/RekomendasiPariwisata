@@ -68,9 +68,6 @@ class RecommenderNet(tf.keras.Model):
 
         return tf.nn.sigmoid(x)
 
-# Load the trained model
-model = RecommenderNet(num_users, num_place, 50)
-model.load_weights("model_weights.h5")
 
 # Streamlit App
 st.title("Sistem Rekomendasi Tempat Wisata")
