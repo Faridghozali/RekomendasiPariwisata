@@ -93,7 +93,7 @@ st.sidebar.title("Pilih Sistem atau Visualisasi")
 visualization_choice = st.sidebar.radio("Pilih opsi:", ("Sistem Rekomendasi Wisata", "Visualisasi Data"))
 
 if visualization_choice == "Sistem Rekomendasi Wisata":
-     st.title("Rekomendasi Pariwisata di Indonesia")
+    st.title("Rekomendasi Pariwisata di Indonesia")
 
     user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
     
