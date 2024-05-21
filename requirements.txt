@@ -1,9 +1,8 @@
-streamlit 
-pandas 
-numpy 
-tensorflow 
-scikit-learn 
-SastraWi 
-matplotlib 
-seaborn 
-google-colab
+streamlit
+pandas
+numpy
+tensorflow
+scikit-learn
+SastraWi
+matplotlib
+seaborn
