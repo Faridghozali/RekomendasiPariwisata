@@ -91,44 +91,13 @@ history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val)
 # Sidebar 1: Recommendation System
 st.sidebar.title("Rekomendasi Pariwisata di Indonesia")
 user_id = st.sidebar.selectbox("Pilih User ID", user['User_Id'].unique())
-place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
-place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
-place_visited_by_user = df[df.User_Id == user_id]
-place_not_visited = place_df[~place_df['id'].isin(place_visited_by_user.Place_Id.values)]['id']
-place_not_visited = list(set(place_not_visited).intersection(set(place_to_place_encoded.keys())))
-place_not_visited = [[place_to_place_encoded.get(x)] for x in place_not_visited]
-user_encoder = user_to_user_encoded.get(user_id)
-user_place_array = np.hstack(([[user_encoder]] * len(place_not_visited), place_not_visited))
-
-# Predict top 7 recommendations
-ratings = model.predict(user_place_array).flatten()
-top_ratings_indices = ratings.argsort()[-7:][::-1]
-recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
-
-st.sidebar.write(f"Daftar rekomendasi untuk: User {user_id}")
-st.sidebar.write("===" * 15)
-st.sidebar.write("----" * 15)
-st.sidebar.write("Tempat dengan rating wisata paling tinggi dari user")
-st.sidebar.write("----" * 15)
-
-top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
-place_df_rows = place_df[place_df['id'].isin(top_place_user)]
-for row in place_df_rows.itertuples():
-    st.sidebar.write(f"{row.place_name} : {row.category}")
-
-st.sidebar.write("----" * 15)
-st.sidebar.write("Top 7 place recommendation")
-st.sidebar.write("----" * 15)
-
-recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
-for row, i in zip(recommended_place.itertuples(), range(1, 8)):
-    st.sidebar.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
-
-st.sidebar.write("===" * 15)
 
 # Sidebar 2: Visualizations
 st.sidebar.title("Visualisasi Data")
 visualization_choice = st.sidebar.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
+
+# Main Content Area
+st.title("Rekomendasi Pariwisata di Indonesia")
 
 if visualization_choice == "Tempat Wisata Terpopuler":
     # Tempat wisata dengan jumlah rating terbanyak
@@ -169,3 +138,42 @@ elif visualization_choice == "Asal Kota Pengunjung":
     sns.countplot(y=askot)
     plt.title('Jumlah Asal Kota dari User')
     st.pyplot(plt)
+
+# Display recommendation system on the right side of the sidebar
+col1, col2 = st.sidebar.columns([1, 2])
+
+with col2:
+    place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
+    place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
+    place_visited_by_user = df[df.User_Id == user_id]
+    place_not_visited = place_df[~place_df['id'].isin(place_visited_by_user.Place_Id.values)]['id']
+    place_not_visited = list(set(place_not_visited).intersection(set(place_to_place_encoded.keys())))
+    place_not_visited = [[place_to_place_encoded.get(x)] for x in place_not_visited]
+    user_encoder = user_to_user_encoded.get(user_id)
+    user_place_array = np.hstack(([[user_encoder]] * len(place_not_visited), place_not_visited))
+
+    # Predict top 7 recommendations
+    ratings = model.predict(user_place_array).flatten()
+    top_ratings_indices = ratings.argsort()[-7:][::-1]
+    recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
+
+    st.write(f"Daftar rekomendasi untuk: User {user_id}")
+    st.write("===" * 15)
+    st.write("----" * 15)
+    st.write("Tempat dengan rating wisata paling tinggi dari user")
+    st.write("----" * 15)
+
+    top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
+    place_df_rows = place_df[place_df['id'].isin(top_place_user)]
+    for row in place_df_rows.itertuples():
+        st.write(f"{row.place_name} : {row.category}")
+
+    st.write("----" * 15)
+    st.write("Top 7 place recommendation")
+    st.write("----" * 15)
+
+    recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
+    for row, i in zip(recommended_place.itertuples(), range(1, 8)):
+        st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
+
+    st.write("===" * 15)
