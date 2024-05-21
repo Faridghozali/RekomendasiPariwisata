@@ -91,15 +91,7 @@ history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val)
 # Streamlit UI
 st.title("Rekomendasi Pariwisata di Indonesia")
 
-# Ubah User ID menjadi Nama Lokasi
-user['Location'] = user['Location'].apply(lambda x: x.split(',')[0])
-user.columns = ['User_Id', 'Age', 'Location']
-
-# Pilihan input untuk User ID menjadi Nama Lokasi
-user_id = st.selectbox("Pilih Lokasi", user['Location'].unique())
-
-# Tambahkan pilihan input untuk umur
-user_age = st.slider("Pilih Umur", min_value=int(user['Age'].min()), max_value=int(user['Age'].max()), value=int(user['Age'].min()))
+user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
 
 place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
 place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
@@ -117,7 +109,7 @@ ratings = model.predict(user_place_array).flatten()
 top_ratings_indices = ratings.argsort()[-7:][::-1]
 recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
 
-st.write(f"Daftar rekomendasi untuk: Lokasi {user_id} dan Umur {user_age}")
+st.write(f"Daftar rekomendasi untuk: User {user_id}")
 st.write("===" * 15)
 st.write("----" * 15)
 st.write("Tempat dengan rating wisata paling tinggi dari user")
@@ -170,7 +162,8 @@ plt.title('Distribusi Harga Masuk Wisata', pad=20)
 st.pyplot(plt)
 
 # Visualisasi asal kota dari user
+askot = user['Location'].apply(lambda x: x.split(',')[0])
 plt.figure(figsize=(8, 6))
-sns.countplot(y='Location', data=user)
+sns.countplot(y=askot)
 plt.title('Jumlah Asal Kota dari User')
 st.pyplot(plt)
