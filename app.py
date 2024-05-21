@@ -91,90 +91,86 @@ history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val)
 # Streamlit UI
 st.title("Rekomendasi Pariwisata di Indonesia")
 
-# User input: nama, lokasi, umur
-nama = st.text_input("Masukkan Nama")
-lokasi = st.text_input("Masukkan Lokasi")
-umur = st.number_input("Masukkan Umur", min_value=0, max_value=150)
+# Ubah User ID menjadi Nama Lokasi
+user['Location'] = user['Location'].apply(lambda x: x.split(',')[0])
+user.columns = ['User_Id', 'Age', 'Location']
 
-# Filter user based on input
-filtered_user = user[(user['Name'] == nama) & (user['Location'] == lokasi) & (user['Age'] == umur)]
+# Pilihan input untuk User ID menjadi Nama Lokasi
+user_id = st.selectbox("Pilih Lokasi", user['Location'].unique())
 
-if not filtered_user.empty:
-    user_id = filtered_user.iloc[0]['User_Id']
+# Tambahkan pilihan input untuk umur
+user_age = st.slider("Pilih Umur", min_value=int(user['Age'].min()), max_value=int(user['Age'].max()), value=int(user['Age'].min()))
 
-    place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
-    place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
+place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
+place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
 
-    place_visited_by_user = df[df.User_Id == user_id]
-    place_not_visited = place_df[~place_df['id'].isin(place_visited_by_user.Place_Id.values)]['id']
-    place_not_visited = list(set(place_not_visited).intersection(set(place_to_place_encoded.keys())))
-    place_not_visited = [[place_to_place_encoded.get(x)] for x in place_not_visited]
+place_visited_by_user = df[df.User_Id == user_id]
+place_not_visited = place_df[~place_df['id'].isin(place_visited_by_user.Place_Id.values)]['id']
+place_not_visited = list(set(place_not_visited).intersection(set(place_to_place_encoded.keys())))
+place_not_visited = [[place_to_place_encoded.get(x)] for x in place_not_visited]
 
-    user_encoder = user_to_user_encoded.get(user_id)
-    user_place_array = np.hstack(([[user_encoder]] * len(place_not_visited), place_not_visited))
+user_encoder = user_to_user_encoded.get(user_id)
+user_place_array = np.hstack(([[user_encoder]] * len(place_not_visited), place_not_visited))
 
-    # Predict top 7 recommendations
-    ratings = model.predict(user_place_array).flatten()
-    top_ratings_indices = ratings.argsort()[-7:][::-1]
-    recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
+# Predict top 7 recommendations
+ratings = model.predict(user_place_array).flatten()
+top_ratings_indices = ratings.argsort()[-7:][::-1]
+recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
 
-    st.write(f"Daftar rekomendasi untuk: {nama}")
-    st.write("===" * 15)
-    st.write("----" * 15)
-    st.write("Tempat dengan rating wisata paling tinggi dari user")
-    st.write("----" * 15)
+st.write(f"Daftar rekomendasi untuk: Lokasi {user_id} dan Umur {user_age}")
+st.write("===" * 15)
+st.write("----" * 15)
+st.write("Tempat dengan rating wisata paling tinggi dari user")
+st.write("----" * 15)
 
-    top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
-    place_df_rows = place_df[place_df['id'].isin(top_place_user)]
-    for row in place_df_rows.itertuples():
-        st.write(f"{row.place_name} : {row.category}")
+top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
+place_df_rows = place_df[place_df['id'].isin(top_place_user)]
+for row in place_df_rows.itertuples():
+    st.write(f"{row.place_name} : {row.category}")
 
-    st.write("----" * 15)
-    st.write("Top 7 place recommendation")
-    st.write("----" * 15)
+st.write("----" * 15)
+st.write("Top 7 place recommendation")
+st.write("----" * 15)
 
-    recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
-    for row, i in zip(recommended_place.itertuples(), range(1, 8)):
-        st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
+recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
+for row, i in zip(recommended_place.itertuples(), range(1, 8)):
+    st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
 
-    st.write("===" * 15)
+st.write("===" * 15)
 
-    # Plotting
-    st.write("Visualisasi Data")
+# Plotting
+st.write("Visualisasi Data")
 
-    # Tempat wisata dengan jumlah rating terbanyak
-    top_10 = rating['Place_Id'].value_counts().reset_index()[0:10]
-    top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
-    plt.figure(figsize=(8, 5))
-    sns.barplot(x='Place_Id', y='Place_Name', data=top_10)
-    plt.title('Jumlah Tempat Wisata dengan Rating Terbanyak', pad=20)
-    plt.ylabel('Jumlah Rating')
-    plt.xlabel('Nama Lokasi')
-    st.pyplot(plt)
+# Tempat wisata dengan jumlah rating terbanyak
+top_10 = rating['Place_Id'].value_counts().reset_index()[0:10]
+top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
+plt.figure(figsize=(8, 5))
+sns.barplot(x='Place_Id', y='Place_Name', data=top_10)
+plt.title('Jumlah Tempat Wisata dengan Rating Terbanyak', pad=20)
+plt.ylabel('Jumlah Rating')
+plt.xlabel('Nama Lokasi')
+st.pyplot(plt)
 
-    # Perbandingan jumlah kategori wisata
-    plt.figure(figsize=(8, 5))
-    sns.countplot(y='Category', data=place)
-    plt.title('Perbandingan Jumlah Kategori Wisata', pad=20)
-    st.pyplot(plt)
+# Perbandingan jumlah kategori wisata
+plt.figure(figsize=(8, 5))
+sns.countplot(y='Category', data=place)
+plt.title('Perbandingan Jumlah Kategori Wisata', pad=20)
+st.pyplot(plt)
 
-    # Distribusi usia user
-    plt.figure(figsize=(8, 5))
-    sns.boxplot(user['Age'])
-    plt.title('Distribusi Usia User', pad=20)
-    st.pyplot(plt)
+# Distribusi usia user
+plt.figure(figsize=(8, 5))
+sns.boxplot(user['Age'])
+plt.title('Distribusi Usia User', pad=20)
+st.pyplot(plt)
 
-    # Distribusi harga masuk tempat wisata
-    plt.figure(figsize=(8, 5))
-    sns.boxplot(place['Price'])
-    plt.title('Distribusi Harga Masuk Wisata', pad=20)
-    st.pyplot(plt)
+# Distribusi harga masuk tempat wisata
+plt.figure(figsize=(8, 5))
+sns.boxplot(place['Price'])
+plt.title('Distribusi Harga Masuk Wisata', pad=20)
+st.pyplot(plt)
 
-    # Visualisasi asal kota dari user
-    askot = user['Location'].apply(lambda x: x.split(',')[0])
-    plt.figure(figsize=(8, 6))
-    sns.countplot(y=askot)
-    plt.title('Jumlah Asal Kota dari User')
-    st.pyplot(plt)
-else:
-    st.write("User tidak ditemukan. Silakan coba lagi dengan input yang valid.")
+# Visualisasi asal kota dari user
+plt.figure(figsize=(8, 6))
+sns.countplot(y='Location', data=user)
+plt.title('Jumlah Asal Kota dari User')
+st.pyplot(plt)
