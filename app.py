@@ -9,7 +9,7 @@ from tensorflow.keras import layers
 
 # Load data
 place_df = pd.read_csv("https://raw.githubusercontent.com/khikisb/SistemRekomendasiWisata/main/tourism_with_id.csv")
-rating = pd.read_csv('https://raw.githubusercontent.com/khikisb/SistemRekomendasiWisata/main/tourism_rating.csv')
+rating = pd.read_csv('https://raw.githubusercontent.com/Faridghozali/RekomendasiPariwisata/main/tourism_rating.csv')
 user = pd.read_csv('https://raw.githubusercontent.com/Faridghozali/RekomendasiPariwisata/main/user.csv')
 
 # Data preprocessing
