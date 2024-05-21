@@ -89,8 +89,8 @@ class myCallback(tf.keras.callbacks.Callback):
 history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val), callbacks=[myCallback()])
 
 # Sidebar 1: Recommendation System
-st.sidebar.title("Rekomendasi Pariwisata di Indonesia")
-user_id = st.sidebar.selectbox("Pilih User ID", user['User_Id'].unique())
+st.title("Rekomendasi Pariwisata di Indonesia")
+user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
 place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
 place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
 place_visited_by_user = df[df.User_Id == user_id]
@@ -105,26 +105,26 @@ ratings = model.predict(user_place_array).flatten()
 top_ratings_indices = ratings.argsort()[-7:][::-1]
 recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
 
-st.sidebar.write(f"Daftar rekomendasi untuk: User {user_id}")
-st.sidebar.write("===" * 15)
-st.sidebar.write("----" * 15)
-st.sidebar.write("Tempat dengan rating wisata paling tinggi dari user")
-st.sidebar.write("----" * 15)
+st.write(f"Daftar rekomendasi untuk: User {user_id}")
+st.write("===" * 15)
+st.write("----" * 15)
+st.write("Tempat dengan rating wisata paling tinggi dari user")
+st.write("----" * 15)
 
 top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
 place_df_rows = place_df[place_df['id'].isin(top_place_user)]
 for row in place_df_rows.itertuples():
-    st.sidebar.write(f"{row.place_name} : {row.category}")
+    st.write(f"{row.place_name} : {row.category}")
 
-st.sidebar.write("----" * 15)
-st.sidebar.write("Top 7 place recommendation")
-st.sidebar.write("----" * 15)
+st.write("----" * 15)
+st.write("Top 7 place recommendation")
+st.write("----" * 15)
 
 recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
 for row, i in zip(recommended_place.itertuples(), range(1, 8)):
-    st.sidebar.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
+    st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
 
-st.sidebar.write("===" * 15)
+st.write("===" * 15)
 
 # Sidebar 2: Visualizations
 st.sidebar.title("Visualisasi Data")
