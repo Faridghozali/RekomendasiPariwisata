@@ -20,10 +20,10 @@ rating, place, user = load_data()
 place = place.drop(['Unnamed: 11', 'Unnamed: 12'], axis=1)
 place = place.drop('Time_Minutes', axis=1)
 
-# Filter ratings for places in Surabaya
+# Filter ratings for places 
 rating = pd.merge(rating, place[['Place_Id']], how='right', on='Place_Id')
 
-# Filter users who have visited Surabaya places
+# Filter users who have visited places
 user = pd.merge(user, rating[['User_Id']], how='right', on='User_Id').drop_duplicates().sort_values('User_Id')
 
 # Encoding function
@@ -89,7 +89,7 @@ class myCallback(tf.keras.callbacks.Callback):
 history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val), callbacks=[myCallback()])
 
 # Streamlit UI
-st.title("Rekomendasi Pariwisata Kota Surabaya")
+st.title("Rekomendasi Pariwisata di Indonesia")
 
 user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
 
