@@ -1,5 +1,9 @@
-streamlit==0.89.0
-pandas==1.3.3
-numpy==1.21.2
-matplotlib==3.4.3
-tensorflow==2.6.0
+streamlit 
+pandas 
+numpy 
+tensorflow 
+scikit-learn 
+SastraWi 
+matplotlib 
+seaborn 
+google-colab
