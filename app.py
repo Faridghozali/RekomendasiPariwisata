@@ -89,6 +89,9 @@ class myCallback(tf.keras.callbacks.Callback):
 history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val), callbacks=[myCallback()])
 
 # Sidebar 1: Recommendation System
+st.sidebar.title("Visualisasi Data")
+visualization_choice = st.sidebar.radio ("Sistem Rekomendasi Wisata")
+if visualization_choice == "Sistem Rekomendasi Wisata":                                                              
 st.title("Rekomendasi Pariwisata di Indonesia")
 user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
 place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
