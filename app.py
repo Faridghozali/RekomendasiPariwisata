@@ -92,7 +92,6 @@ history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val)
 st.sidebar.title("Sistem Rekomendasi Pariwisata")
 visualization_choice = st.sidebar.radio ("Sistem Rekomendasi Pariwisata")
 if visualization_choice == "Sistem Rekomendasi Pariwisata":
-st.sidebar.title("Rekomendasi Pariwisata di Indonesia")
 user_id = st.sidebar.selectbox("Pilih User ID", user['User_Id'].unique())
 place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
 place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
