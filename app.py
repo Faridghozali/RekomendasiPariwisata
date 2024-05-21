@@ -89,7 +89,7 @@ class myCallback(tf.keras.callbacks.Callback):
 history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val), callbacks=[myCallback()])
 
 # Sidebar 1: Recommendation System
-st.sidebar.title("Visualisasi Data")
+st.sidebar.title("Sistem")
 visualization_choice = st.sidebar.radio ("Sistem Rekomendasi Wisata")
 if visualization_choice == "Sistem Rekomendasi Wisata":                                                              
 st.title("Rekomendasi Pariwisata di Indonesia")
@@ -133,7 +133,7 @@ st.write("===" * 15)
 st.sidebar.title("Visualisasi Data")
 visualization_choice = st.sidebar.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
 
-if visualization_choice == "Tempat Wisata Terpopuler":
+elif visualization_choice == "Tempat Wisata Terpopuler":
     # Tempat wisata dengan jumlah rating terbanyak
     top_10 = rating['Place_Id'].value_counts().reset_index()[0:10]
     top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
