@@ -94,7 +94,7 @@ visualization_choice = st.sidebar.radio("Pilih opsi:", ("Sistem Rekomendasi Wisa
 
 if visualization_choice == "Sistem Rekomendasi Wisata":
     st.title("Rekomendasi Pariwisata di Indonesia")
-
+    
     user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
     
     place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
@@ -112,7 +112,7 @@ if visualization_choice == "Sistem Rekomendasi Wisata":
     ratings = model.predict(user_place_array).flatten()
     top_ratings_indices = ratings.argsort()[-7:][::-1]
     recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
-
+    
     st.write(f"Daftar rekomendasi untuk: User {user_id}")
     st.write("===" * 15)
     st.write("----" * 15)
