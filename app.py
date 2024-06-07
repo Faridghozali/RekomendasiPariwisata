@@ -19,7 +19,7 @@ def filter_places():
 
     # Filter data berdasarkan input pengguna
     filtered_data = info_tourism[(info_tourism['Category'] == categories) &
-                                 (info_tourism['City'] == cities) &
+                                 (info_tourism['City'] == cities) ]
 
     # Tampilkan hasil filter
     st.header('Tempat Wisata yang Sesuai dengan Preferensi Kamu')
