@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 import string
 
@@ -32,41 +31,11 @@ def filter_places():
     else:
         st.write(filtered_data[['Place_Name', 'Description', 'Category', 'City', 'Price', 'Rating']])
 
-# Tab kedua: Rekomendasi berdasarkan deskripsi
-def recommend_by_description():
-    user_input = st.text_area("Ceritakan kamu mau pergi kemana? dengan siapa?dan ingin melakukan apa?")
-    st.write('Contoh : saya ingin pergi dengan keluarga dan ingin melihat lukisan lukisan yang indah')
-    st.write('Contoh : saya ingin pergi ke pantai yang masih jarang orang tahu')
-    if user_input:
-        # Pra-pemrosesan teks pada input pengguna
-        stop_factory = StopWordRemoverFactory()
-        stop_words = stop_factory.get_stop_words()
-        stop_words.extend(string.punctuation)
-
-        tfidf = TfidfVectorizer(stop_words=stop_words)
-        info_tourism['Description'] = info_tourism['Description'].fillna('')
-        tfidf_matrix = tfidf.fit_transform(info_tourism['Description'])
-
-        user_tfidf = tfidf.transform([user_input])
-
-        # Hitung cosine similarity antara input pengguna dan deskripsi tempat wisata
-        similarity_scores = cosine_similarity(user_tfidf, tfidf_matrix)
-
-        # Dapatkan indeks tempat wisata yang direkomendasikan berdasarkan similarity scores
-        recommended_indices = similarity_scores.argsort()[0][::-1][:5]
-
-        # Tampilkan tempat wisata yang direkomendasikan
-        recommended_places = info_tourism.iloc[recommended_indices][['Place_Name', 'Description', 'Category', 'City', 'Price', 'Rating']]
-        st.write("Tempat wisata yang direkomendasikan berdasarkan deskripsi Kamu:")
-        st.write(recommended_places)
-    else:
-        st.write("Hindari menggunakan nama kota, Karena kami akan merekomendasikan tempat yang paling cocok dengan Kamu di Seluruh Indonesia")
-
 # Main App
 st.title("Sistem Rekomendasi Tempat Wisata")
 
 # Pilihan tab
-tabs = ["Filter Tempat Wisata", "Rekomendasi berdasarkan Deskripsi"]
+tabs = ["Filter Tempat Wisata"]
 choice = st.sidebar.radio("Navigasi", tabs)
 
 # Tampilkan tab yang dipilih
