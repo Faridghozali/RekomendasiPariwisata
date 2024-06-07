@@ -6,8 +6,12 @@ from tensorflow.keras import layers
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 import string
+
+# Load data
+info_tourism = pd.read_csv("https://raw.githubusercontent.com/khikisb/SistemRekomendasiWisata/main/tourism_with_id.csv")
 
 # Load dataset
 @st.cache
@@ -93,7 +97,7 @@ history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val)
 
 # Streamlit UI
 st.sidebar.title("Pilih Sistem atau Visualisasi")
-visualization_choice = st.sidebar.radio("Pilih opsi:", ("Sistem Rekomendasi Wisata","Coba", "Visualisasi Data"))
+visualization_choice = st.sidebar.radio("Pilih opsi:", ("Sistem Rekomendasi Wisata", "Visualisasi Data"))
 
 if visualization_choice == "Sistem Rekomendasi Wisata":
     st.title("Rekomendasi Pariwisata di Indonesia")
@@ -122,75 +126,4 @@ if visualization_choice == "Sistem Rekomendasi Wisata":
     st.write("Tempat dengan rating wisata paling tinggi dari user")
     st.write("----" * 15)
     
-    top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
-    place_df_rows = place_df[place_df['id'].isin(top_place_user)]
-    for row in place_df_rows.itertuples():
-        st.write(f"{row.place_name} : {row.category}")
-    
-    st.write("----" * 15)
-    st.write("Top 7 place recommendation")
-    st.write("----" * 15)
-    
-    recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
-    for row, i in zip(recommended_place.itertuples(), range(1, 8)):
-        st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
-    
-    st.write("===" * 15)
-
-if visualization_choice == "Sistem Rekomendasi Wisata":
-    st.title('Filter Tempat Wisata')
-    cities = st.selectbox('Lokasi?', place['City'].unique())
-
-    # Filter data berdasarkan lokasi
-    filtered_data = place[place['City'] == cities]
-
-    # Tampilkan hasil filter
-    st.header('Tempat Wisata yang Sesuai dengan Lokasi Kamu')
-    if len(filtered_data) == 0:
-        st.write('Maaf, tidak ada tempat wisata yang sesuai dengan lokasi Kamu.')
-    else:
-        st.write(filtered_data[['Place_Name', 'Description', 'Category', 'City', 'Price', 'Rating']])
-
-elif visualization_choice == "Visualisasi Data":
-    st.sidebar.title("Visualisasi Data")
-    viz_choice = st.sidebar.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
-
-    if viz_choice == "Tempat Wisata Terpopuler":
-        # Tempat wisata dengan jumlah rating terbanyak
-        top_10 = rating['Place_Id'].value_counts().reset_index()[0:10]
-        top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
-        plt.figure(figsize=(8, 5))
-        sns.barplot(x='Place_Id', y='Place_Name', data=top_10)
-        plt.title('Jumlah Tempat Wisata dengan Rating Terbanyak', pad=20)
-        plt.ylabel('Jumlah Rating')
-        plt.xlabel('Nama Lokasi')
-        st.pyplot(plt)
-
-    elif viz_choice == "Perbandingan Kategori Wisata":
-        # Perbandingan jumlah kategori wisata
-        plt.figure(figsize=(8, 5))
-        sns.countplot(y='Category', data=place)
-        plt.title('Perbandingan Jumlah Kategori Wisata', pad=20)
-        st.pyplot(plt)
-
-    elif viz_choice == "Distribusi Usia User":
-        # Distribusi usia user
-        plt.figure(figsize=(8, 5))
-        sns.boxplot(user['Age'])
-        plt.title('Distribusi Usia User', pad=20)
-        st.pyplot(plt)
-
-    elif viz_choice == "Distribusi Harga Tiket Masuk":
-        # Distribusi harga masuk tempat wisata
-        plt.figure(figsize=(8, 5))
-        sns.boxplot(place['Price'])
-        plt.title('Distribusi Harga Masuk Wisata', pad=20)
-        st.pyplot(plt)
-
-    elif viz_choice == "Asal Kota Pengunjung":
-        # Visualisasi asal kota dari user
-        askot = user['Location'].apply(lambda x: x.split(',')[0])
-        plt.figure(figsize=(8, 6))
-        sns.countplot(y=askot)
-        plt.title('Jumlah Asal Kota dari User')
-        st.pyplot(plt)
+    top_place_user = place_visited
