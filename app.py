@@ -90,7 +90,7 @@ history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val)
 
 # Streamlit UI
 st.sidebar.title("Pilih Sistem atau Visualisasi")
-visualization_choice = st.sidebar.radio("Pilih opsi:", ("Sistem Rekomendasi Wisata","coba", "Visualisasi Data"))
+visualization_choice = st.sidebar.radio("Pilih opsi:", ("Sistem Rekomendasi Wisata", "Visualisasi Data"))
 
 if visualization_choice == "Sistem Rekomendasi Wisata":
     st.title("Rekomendasi Pariwisata di Indonesia")
@@ -133,29 +133,6 @@ if visualization_choice == "Sistem Rekomendasi Wisata":
         st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
     
     st.write("===" * 15)
-
-if visualization_choice == "coba":
-    st.sidebar.title('Filter Tempat Wisata')
-    min_price = info_tourism['Price'].min()
-    max_price = info_tourism['Price'].max()
-    categories = st.sidebar.selectbox('Category wisata?', info_tourism['Category'].unique())
-    cities = st.sidebar.selectbox('Lokasi?', info_tourism['City'].unique())
-    selected_price_range = st.sidebar.slider('Range Harga?', min_value=min_price, max_value=max_price, value=(min_price, max_price))
-
-    min_price, max_price = selected_price_range
-
-    # Filter data berdasarkan input pengguna
-    filtered_data = info_tourism[(info_tourism['Category'] == categories) &
-                                 (info_tourism['City'] == cities) &
-                                 (info_tourism['Price'] >= min_price) &
-                                 (info_tourism['Price'] <= max_price)]
-
-    # Tampilkan hasil filter
-    st.header('Tempat Wisata yang Sesuai dengan Preferensi Kamu')
-    if len(filtered_data) == 0:
-        st.write('Maaf, tidak ada tempat wisata yang sesuai dengan preferensi Kamu.')
-    else:
-        st.write(filtered_data[['Place_Name', 'Description', 'Category', 'City', 'Price', 'Rating']])
 
 elif visualization_choice == "Visualisasi Data":
     st.sidebar.title("Visualisasi Data")
