@@ -5,6 +5,9 @@ import tensorflow as tf
 from tensorflow.keras import layers
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+import string
 
 # Load dataset
 @st.cache
@@ -90,7 +93,7 @@ history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val)
 
 # Streamlit UI
 st.sidebar.title("Pilih Sistem atau Visualisasi")
-visualization_choice = st.sidebar.radio("Pilih opsi:", ("Sistem Rekomendasi Wisata", "Visualisasi Data"))
+visualization_choice = st.sidebar.radio("Pilih opsi:", ("Sistem Rekomendasi Wisata","Coba", "Visualisasi Data"))
 
 if visualization_choice == "Sistem Rekomendasi Wisata":
     st.title("Rekomendasi Pariwisata di Indonesia")
@@ -133,6 +136,20 @@ if visualization_choice == "Sistem Rekomendasi Wisata":
         st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
     
     st.write("===" * 15)
+
+if visualization_choice == "Sistem Rekomendasi Wisata":
+    st.sidebar.title('Filter Tempat Wisata')
+    cities = st.sidebar.selectbox('Lokasi?', place['City'].unique())
+
+    # Filter data berdasarkan lokasi
+    filtered_data = place[place['City'] == cities]
+
+    # Tampilkan hasil filter
+    st.header('Tempat Wisata yang Sesuai dengan Lokasi Kamu')
+    if len(filtered_data) == 0:
+        st.write('Maaf, tidak ada tempat wisata yang sesuai dengan lokasi Kamu.')
+    else:
+        st.write(filtered_data[['Place_Name', 'Description', 'Category', 'City', 'Price', 'Rating']])
 
 elif visualization_choice == "Visualisasi Data":
     st.sidebar.title("Visualisasi Data")
