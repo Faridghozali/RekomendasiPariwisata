@@ -10,8 +10,6 @@ info_tourism = pd.read_csv("tourism_with_id.csv")
 # Tab pertama: Filter Tempat Wisata
 def filter_places():
     st.sidebar.title('Filter Tempat Wisata')
-    min_price = info_tourism['Price'].min()
-    max_price = info_tourism['Price'].max()
     categories = st.sidebar.selectbox('Category wisata?', info_tourism['Category'].unique())
     cities = st.sidebar.selectbox('Lokasi?', info_tourism['City'].unique())
 
