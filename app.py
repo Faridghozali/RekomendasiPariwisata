@@ -18,14 +18,16 @@ def filter_places():
 
     # Filter data berdasarkan input pengguna
     filtered_data = info_tourism[(info_tourism['Category'] == categories) &
-                                 (info_tourism['City'] == cities)]
+                                 (info_tourism['City'] == cities) &
+                                 (info_tourism['Price'] >= min_price) &
+                                 (info_tourism['Price'] <= max_price)]
 
     # Tampilkan hasil filter
     st.header('Tempat Wisata yang Sesuai dengan Preferensi Kamu')
     if len(filtered_data) == 0:
         st.write('Maaf, tidak ada tempat wisata yang sesuai dengan preferensi Kamu.')
     else:
-        st.write(filtered_data[['Place_Name', 'Category', 'City', 'Price', 'Rating']])
+        st.write(filtered_data[['Place_Name', 'Description', 'Category', 'City', 'Price', 'Rating']])
 # Main App
 st.title("Sistem Rekomendasi Tempat Wisata")
 
