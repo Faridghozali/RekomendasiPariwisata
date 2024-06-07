@@ -138,8 +138,8 @@ if visualization_choice == "Sistem Rekomendasi Wisata":
     st.write("===" * 15)
 
 if visualization_choice == "Sistem Rekomendasi Wisata":
-    st.sidebar.title('Filter Tempat Wisata')
-    cities = st.sidebar.selectbox('Lokasi?', place['City'].unique())
+    st.title('Filter Tempat Wisata')
+    cities = st.selectbox('Lokasi?', place['City'].unique())
 
     # Filter data berdasarkan lokasi
     filtered_data = place[place['City'] == cities]
