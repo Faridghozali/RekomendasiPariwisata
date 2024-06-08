@@ -20,7 +20,7 @@ def filter_places():
 
     # Filter data berdasarkan input pengguna
     filtered_data = info_tourism[(info_tourism['Category'] == categories) &
-                                 (info_tourism['City'] == cities)
+                                 (info_tourism['City'] == cities)&
                                  (info_tourism['Price'] >= min_price) &
                                  (info_tourism['Price'] <= max_price)]
 
