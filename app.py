@@ -13,10 +13,15 @@ page_bg_img = '''
     background-size: cover;
     background-position: center;
 }
+
 .css-1d391kg {
     background-image: url("https://example.com/background_sidebar.jpg");
     background-size: cover;
     background-position: center;
+}
+
+header, .css-18e3th9, .css-1d391kg {
+    display: none;
 }
 </style>
 '''
