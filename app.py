@@ -41,16 +41,16 @@ def filter_places():
     name = st.text_input('Masukkan nama kamu:')
     age = st.number_input('Masukkan umur kamu:', min_value=10, max_value=100)
     
-    categories = st.selectbox('Masukkan kategori wisata', info_tourism['kategori'].unique())
-    cities = st.selectbox('Masukan Lokasi kamu', info_tourism['Lokasi'].unique())
+    categories = st.selectbox('Category wisata?', info_tourism['Category'].unique())
+    cities = st.selectbox('Lokasi?', info_tourism['City'].unique())
 
     # Tampilkan hasil filter hanya jika semua inputan sudah terisi
-    if name and age and kategories and lokasies:
+    if name and age and categories and cities:
         # Filter data berdasarkan input pengguna
-        filtered_data = info_tourism[(info_tourism['kategory'] == kategories) &
-                                     (info_tourism['Lokasi'] == lokasies)]
+        filtered_data = info_tourism[(info_tourism['Category'] == categories) &
+                                     (info_tourism['City'] == cities)]
 
-        st.header(f'Daftar rekomendasi wisata untuk {name} yang berumur {age} tahun :')
+        st.header(f'Daftar rekomendasi wisata untuk {name} yang berumur {age} tahun')
 
         if len(filtered_data) == 0:
             st.write('Mohon maaf, tidak ada rekomendasi tempat wisata yang sesuai dengan preferensi Kamu saat ini.')
