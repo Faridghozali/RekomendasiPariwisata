@@ -14,7 +14,7 @@ def filter_places():
     max_price = info_tourism['Price'].max()
     categories = st.selectbox('Category wisata?', info_tourism['Category'].unique())
     cities = st.selectbox('Lokasi?', info_tourism['City'].unique())
-    selected_price_range = st.slider('Range Harga?', min_value=min_price, max_value=max_price, value=(min_price, max_price))
+
 
     min_price, max_price = selected_price_range
 
