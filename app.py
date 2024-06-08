@@ -29,7 +29,7 @@ def filter_places():
     if len(filtered_data) == 0:
         st.write('Maaf, tidak ada tempat wisata yang sesuai dengan preferensi Kamu.')
     else:
-        st.write(filtered_data[['Place_Name', 'Description', 'Category', 'City', 'Price', 'Rating']])
+        st.write(filtered_data[['Place_Name', 'Category', 'City', 'Price', 'Rating']])
          
 # Main App
 st.title("Sistem Rekomendasi Tempat Wisata")
