@@ -5,6 +5,25 @@ from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFacto
 # Load data
 info_tourism = pd.read_csv("tourism_with_id.csv")
 
+# CSS for background images
+page_bg_img = '''
+<style>
+.stApp {
+    background-image: url("https://example.com/background_main.jpg");
+    background-size: cover;
+    background-position: center;
+}
+.css-1d391kg {
+    background-image: url("https://example.com/background_sidebar.jpg");
+    background-size: cover;
+    background-position: center;
+}
+</style>
+'''
+
+# Apply CSS
+st.markdown(page_bg_img, unsafe_allow_html=True)
+
 # Tab pertama: Filter Tempat Wisata
 def filter_places():
     # Input user for name and age
