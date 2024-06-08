@@ -25,12 +25,12 @@ page_bg_img = '''
 }
 
 /* Font color to black */
-body, .css-10trblm, .css-1v3fvcr {
+body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
     color: black;
 }
 
 /* Selectbox background to white */
-.css-1d391kg, .css-2tvg0n, .css-1a32fsj, .css-2hb7k5 {
+.css-1d391kg, .css-2tvg0n, .css-1a32fsj, .css-2hb7k5, .stSelectbox>div {
     background-color: white;
 }
 
