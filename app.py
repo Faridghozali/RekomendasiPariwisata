@@ -14,15 +14,17 @@ page_bg_img = '''
     background-position: center;
 }
 
+.stApp="stHeader"{
+background-color: rgba(0,0,0,0);
+}
+
 .css-1d391kg {
     background-image: url("https://example.com/background_sidebar.jpg");
     background-size: cover;
     background-position: center;
 }
 
-header, .css-18e3th9, .css-1d391kg {
-    display: none;
-}
+
 </style>
 '''
 
