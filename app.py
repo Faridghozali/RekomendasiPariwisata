@@ -41,8 +41,8 @@ def filter_places():
     name = st.text_input('Masukkan nama kamu:')
     age = st.number_input('Masukkan umur kamu:', min_value=10, max_value=100)
     
-    categories = st.selectbox('Category wisata?', info_tourism['Category'].unique())
-    cities = st.selectbox('Lokasi?', info_tourism['City'].unique())
+    categories = st.selectbox('Kategori wisata', info_tourism['Category'].unique())
+    cities = st.selectbox('Lokasi kamu', info_tourism['City'].unique())
 
     # Tampilkan hasil filter hanya jika semua inputan sudah terisi
     if name and age and categories and cities:
@@ -57,7 +57,7 @@ def filter_places():
         else:
             # Rename columns for display
             filtered_data_display = filtered_data.rename(columns={
-                'Place_Name': 'Nama_Kota',
+                'Place_Name': 'Nama_Tempat',
                 'Category': 'Kategori',
                 'City': 'Lokasi',
                 'Price': 'Harga',
