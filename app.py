@@ -5,7 +5,7 @@ from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFacto
 # Load data
 info_tourism = pd.read_csv("tourism_with_id.csv")
 
-# CSS for background images
+# CSS for background images and custom styling
 page_bg_img = '''
 <style>
 .stApp {
@@ -55,7 +55,15 @@ def filter_places():
         if len(filtered_data) == 0:
             st.write('Mohon maaf, tidak ada rekomendasi tempat wisata yang sesuai dengan preferensi Kamu saat ini.')
         else:
-            st.write(filtered_data[['Place_Name', 'Category', 'City', 'Price', 'Rating']])
+            # Rename columns for display
+            filtered_data_display = filtered_data.rename(columns={
+                'Place_Name': 'Nama_Kota',
+                'Category': 'Kategori',
+                'City': 'Lokasi',
+                'Price': 'Harga',
+                'Rating': 'Rating'
+            })
+            st.write(filtered_data_display[['Nama_Kota', 'Kategori', 'Lokasi', 'Harga', 'Rating']])
     else:
         st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
 
