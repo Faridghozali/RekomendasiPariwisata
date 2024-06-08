@@ -9,7 +9,7 @@ info_tourism = pd.read_csv("tourism_with_id.csv")
 page_bg_img = '''
 <style>
 .stApp {
-    background-image: url("https://example.com/background_main.jpg");
+    background-image: url("https://islamic-center.or.id/wp-content/uploads/2016/07/Pariwisata-Halal-Indonesia.jpg");
     background-size: cover;
     background-position: center;
 }
