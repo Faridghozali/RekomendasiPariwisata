@@ -24,8 +24,11 @@ page_bg_img = '''
     background-position: center;
 }
 
-
-
+/* Font color to black and bold */
+body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
+    color: black;
+    font-weight: bold;
+}
 </style>
 '''
 
