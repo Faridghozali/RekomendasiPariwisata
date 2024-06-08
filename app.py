@@ -63,7 +63,7 @@ def filter_places():
                 'Price': 'Harga',
                 'Rating': 'Rating'
             })
-            st.write(filtered_data_display[['Nama_Kota', 'Kategori', 'Lokasi', 'Harga', 'Rating']])
+            st.write(filtered_data_display[['Nama_Tempat', 'Kategori', 'Lokasi', 'Harga', 'Rating']])
     else:
         st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
 
