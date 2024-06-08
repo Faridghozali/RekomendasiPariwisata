@@ -14,8 +14,8 @@ page_bg_img = '''
     background-position: center;
 }
 
-.stApp="stHeader"{
-background-color: rgba(0,0,0,0);
+.stApp > header {
+    background-color: rgba(0,0,0,0);
 }
 
 .css-1d391kg {
