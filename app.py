@@ -55,7 +55,7 @@ def filter_places():
         if len(filtered_data) == 0:
             st.write('Mohon maaf, tidak ada rekomendasi tempat wisata yang sesuai dengan preferensi Kamu saat ini.')
         else:
-            st.write(filtered_data[['Nama_Tempat', 'Kategori', 'Lokasi, 'Harga', 'Rating']])
+            st.write(filtered_data[['Place_Name', 'Category', 'City', 'Price', 'Rating']])
     else:
         st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
 
