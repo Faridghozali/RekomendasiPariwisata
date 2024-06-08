@@ -8,6 +8,11 @@ info_tourism = pd.read_csv("tourism_with_id.csv")
 # Tab pertama: Filter Tempat Wisata
 def filter_places():
     st.title('Filter Tempat Wisata')
+    
+    # Input user for name and age
+    name = st.text_input('Masukkan nama kamu:')
+    age = st.number_input('Masukkan umur kamu:', min_value=1, max_value=100)
+    
     categories = st.selectbox('Category wisata?', info_tourism['Category'].unique())
     cities = st.selectbox('Lokasi?', info_tourism['City'].unique())
 
@@ -16,7 +21,11 @@ def filter_places():
                                  (info_tourism['City'] == cities)]
 
     # Tampilkan hasil filter
-    st.header('Tempat Wisata yang Sesuai dengan Preferensi Kamu')
+    if name and age:
+        st.header(f'Daftar rekomendasi wisata untuk {name} yang berumur {age} tahun')
+    else:
+        st.header('Daftar rekomendasi wisata')
+
     if len(filtered_data) == 0:
         st.write('Maaf, tidak ada tempat wisata yang sesuai dengan preferensi Kamu.')
     else:
