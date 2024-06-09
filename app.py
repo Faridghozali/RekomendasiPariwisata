@@ -69,7 +69,6 @@ def filter_places():
 
 # Tab kedua: Visualisasi Data
 def data():
-st.sidebar.title("Visualisasi Data")
     viz_choice = st.sidebar.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
 
     if viz_choice == "Tempat Wisata Terpopuler":
