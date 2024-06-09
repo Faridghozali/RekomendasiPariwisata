@@ -179,6 +179,16 @@ def filter_by_user():
     place_df_rows = place_df[place_df['id'].isin(top_place_user)]
     for row in place_df_rows.itertuples():
         st.write(f"{row.place_name} : {row.category}")
+
+ st.write("----" * 15)
+    st.write("Top 7 place recommendation")
+    st.write("----" * 15)
+    
+    recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
+    for row, i in zip(recommended_place.itertuples(), range(1, 8)):
+        st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
+    
+    st.write("===" * 15)
     
    
 
