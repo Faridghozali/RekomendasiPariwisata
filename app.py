@@ -153,8 +153,8 @@ def filter_places():
 def filter_by_user():
      user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
     
-    place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
-    place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
+    place_df = place[[Nama_Tempat', 'Kategori', 'Lokasi', 'Harga', 'Rating']]
+    place_df.columns = ['id', Nama_Tempat', 'Kategori', 'Rating',  'Harga']
     
     place_visited_by_user = df[df.User_Id == user_id]
     place_not_visited = place_df[~place_df['id'].isin(place_visited_by_user.Place_Id.values)]['id']
