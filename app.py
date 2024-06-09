@@ -1,9 +1,15 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
 # Load data
 info_tourism = pd.read_csv("tourism_with_id.csv")
+# Make sure the data for visualizations is loaded, e.g.:
+# place = pd.read_csv("place_data.csv")
+# rating = pd.read_csv("rating_data.csv")
+# user = pd.read_csv("user_data.csv")
 
 # CSS for background images and custom styling
 page_bg_img = '''
@@ -76,7 +82,7 @@ def visualisasi_data():
         top_10 = rating['Place_Id'].value_counts().reset_index()[0:10]
         top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
         plt.figure(figsize=(8, 5))
-        sns.barplot(x='Place_Id', y='Place_Name', data=top_10)
+        sns.barplot(x='index', y='Place_Id', data=top_10)
         plt.title('Jumlah Tempat Wisata dengan Rating Terbanyak', pad=20)
         plt.ylabel('Jumlah Rating')
         plt.xlabel('Nama Lokasi')
@@ -111,18 +117,15 @@ def visualisasi_data():
         plt.title('Jumlah Asal Kota dari User')
         st.pyplot(plt)
 
-
 # Main App
 st.title("Rekomendasi Tempat Wisata di Indonesia")
 
 # Pilihan tab
-tabs = ["Sistem Rekomendasi Wisata"]
+tabs = ["Sistem Rekomendasi Wisata", "Visualisasi Data"]
 choice = st.sidebar.radio("Pilihan Menu", tabs)
 
 # Tampilkan tab yang dipilih
 if choice == "Sistem Rekomendasi Wisata":
     filter_places()
-if choice == "Sistem Rekomendasi Wisata dari User sebelumnya":
-    filter_places()
-elif choice == "visualisasi_data":
+elif choice == "Visualisasi Data":
     visualisasi_data()
