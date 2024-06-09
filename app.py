@@ -67,6 +67,52 @@ def filter_places():
     else:
         st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
 
+# Tab kedua: Visualisasi Data
+def data():
+st.sidebar.title("Visualisasi Data")
+    viz_choice = st.sidebar.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
+
+    if viz_choice == "Tempat Wisata Terpopuler":
+        # Tempat wisata dengan jumlah rating terbanyak
+        top_10 = rating['Place_Id'].value_counts().reset_index()[0:10]
+        top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
+        plt.figure(figsize=(8, 5))
+        sns.barplot(x='Place_Id', y='Place_Name', data=top_10)
+        plt.title('Jumlah Tempat Wisata dengan Rating Terbanyak', pad=20)
+        plt.ylabel('Jumlah Rating')
+        plt.xlabel('Nama Lokasi')
+        st.pyplot(plt)
+
+    elif viz_choice == "Perbandingan Kategori Wisata":
+        # Perbandingan jumlah kategori wisata
+        plt.figure(figsize=(8, 5))
+        sns.countplot(y='Category', data=place)
+        plt.title('Perbandingan Jumlah Kategori Wisata', pad=20)
+        st.pyplot(plt)
+
+    elif viz_choice == "Distribusi Usia User":
+        # Distribusi usia user
+        plt.figure(figsize=(8, 5))
+        sns.boxplot(user['Age'])
+        plt.title('Distribusi Usia User', pad=20)
+        st.pyplot(plt)
+
+    elif viz_choice == "Distribusi Harga Tiket Masuk":
+        # Distribusi harga masuk tempat wisata
+        plt.figure(figsize=(8, 5))
+        sns.boxplot(place['Price'])
+        plt.title('Distribusi Harga Masuk Wisata', pad=20)
+        st.pyplot(plt)
+
+    elif viz_choice == "Asal Kota Pengunjung":
+        # Visualisasi asal kota dari user
+        askot = user['Location'].apply(lambda x: x.split(',')[0])
+        plt.figure(figsize=(8, 6))
+        sns.countplot(y=askot)
+        plt.title('Jumlah Asal Kota dari User')
+        st.pyplot(plt)
+
+
 # Main App
 st.title("Rekomendasi Tempat Wisata di Indonesia")
 
@@ -80,4 +126,4 @@ if choice == "Sistem Rekomendasi Wisata":
 if choice == "Sistem Rekomendasi Wisata dari User sebelumnya":
     filter_places()
 elif choice == "Visualisasi Data":
-    recommend_by_description()
+    data()
