@@ -175,6 +175,14 @@ def filter_by_user():
     st.write("Tempat dengan rating wisata paling tinggi dari user")
     st.write("----" * 15)
 
+ top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
+    place_df_rows = place_df[place_df['id'].isin(top_place_user)]
+    for row in place_df_rows.itertuples():
+        st.write(f"{row.place_name} : {row.category}")
+    
+   
+
+
 # Tab ketiga: Visualisasi Data
 def visualisasi_data():
     viz_choice = st.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
