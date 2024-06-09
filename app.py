@@ -151,7 +151,7 @@ def filter_places():
 
 # Tab kedua: Filter berdasarkan User
 def filter_by_user():
-    user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
+     user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
     
     place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
     place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
@@ -174,13 +174,13 @@ def filter_by_user():
     st.write("----" * 15)
     st.write("Tempat dengan rating wisata paling tinggi dari user")
     st.write("----" * 15)
-
- top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
+    
+    top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
     place_df_rows = place_df[place_df['id'].isin(top_place_user)]
     for row in place_df_rows.itertuples():
         st.write(f"{row.place_name} : {row.category}")
-
- st.write("----" * 15)
+    
+    st.write("----" * 15)
     st.write("Top 7 place recommendation")
     st.write("----" * 15)
     
@@ -189,7 +189,6 @@ def filter_by_user():
         st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
     
     st.write("===" * 15)
-    
    
 
 
