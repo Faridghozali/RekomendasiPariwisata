@@ -68,8 +68,8 @@ def filter_places():
         st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
 
 # Tab kedua: Visualisasi Data
-def data():
-    viz_choice = st.sidebar.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
+def visualisasi_data():
+    viz_choice = st.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
 
     if viz_choice == "Tempat Wisata Terpopuler":
         # Tempat wisata dengan jumlah rating terbanyak
@@ -124,5 +124,5 @@ if choice == "Sistem Rekomendasi Wisata":
     filter_places()
 if choice == "Sistem Rekomendasi Wisata dari User sebelumnya":
     filter_places()
-elif choice == "Visualisasi Data":
-    data()
+elif choice == "visualisasi_data":
+    visualisasi_data()
