@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import tensorflow as tf
 from tensorflow.keras import layers
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
-# Load precomputed dataset
+# Load dataset
 def load_data():
-    rating = pd.read_csv('tourism_rating_encoded.csv')
+    rating = pd.read_csv('tourism_rating.csv')
     place = pd.read_csv('tourism_with_id.csv')
     user = pd.read_csv('user.csv')
     return rating, place, user
@@ -55,9 +56,23 @@ rating = pd.merge(rating, place[['Place_Id']], how='right', on='Place_Id')
 # Filter users who have visited places
 user = pd.merge(user, rating[['User_Id']], how='right', on='User_Id').drop_duplicates().sort_values('User_Id')
 
-num_users, num_place = rating['user'].nunique(), rating['place'].nunique()
+# Encoding function
+def dict_encoder(col, data):
+    unique_val = data[col].unique().tolist()
+    val_to_val_encoded = {x: i for i, x in enumerate(unique_val)}
+    val_encoded_to_val = {i: x for i, x in enumerate(unique_val)}
+    return val_to_val_encoded, val_encoded_to_val
+
+# Encoding User_Id and Place_Id
+user_to_user_encoded, user_encoded_to_user = dict_encoder('User_Id', rating)
+place_to_place_encoded, place_encoded_to_place = dict_encoder('Place_Id', rating)
+
+rating['user'] = rating['User_Id'].map(user_to_user_encoded)
+rating['place'] = rating['Place_Id'].map(place_to_place_encoded)
+
+num_users, num_place = len(user_to_user_encoded), len(place_to_place_encoded)
 rating['Place_Ratings'] = rating['Place_Ratings'].values.astype(np.float32)
-min_rating, max_rating = rating['Place_Ratings'].min(), rating['Place_Ratings'].max()
+min_rating, max_rating = min(rating['Place_Ratings']), max(rating['Place_Ratings'])
 
 # Shuffle the dataset
 df = rating.sample(frac=1, random_state=42)
