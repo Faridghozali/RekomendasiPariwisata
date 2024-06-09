@@ -44,6 +44,80 @@ body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
 # Apply CSS
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
+# Drop unnecessary columns
+place = place.drop(['Unnamed: 11', 'Unnamed: 12'], axis=1)
+place = place.drop('Time_Minutes', axis=1)
+
+# Filter ratings for places 
+rating = pd.merge(rating, place[['Place_Id']], how='right', on='Place_Id')
+
+# Filter users who have visited places
+user = pd.merge(user, rating[['User_Id']], how='right', on='User_Id').drop_duplicates().sort_values('User_Id')
+
+# Encoding function
+def dict_encoder(col, data):
+    unique_val = data[col].unique().tolist()
+    val_to_val_encoded = {x: i for i, x in enumerate(unique_val)}
+    val_encoded_to_val = {i: x for i, x in enumerate(unique_val)}
+    return val_to_val_encoded, val_encoded_to_val
+
+# Encoding User_Id and Place_Id
+user_to_user_encoded, user_encoded_to_user = dict_encoder('User_Id', rating)
+place_to_place_encoded, place_encoded_to_place = dict_encoder('Place_Id', rating)
+
+rating['user'] = rating['User_Id'].map(user_to_user_encoded)
+rating['place'] = rating['Place_Id'].map(place_to_place_encoded)
+
+num_users, num_place = len(user_to_user_encoded), len(place_to_place_encoded)
+rating['Place_Ratings'] = rating['Place_Ratings'].values.astype(np.float32)
+min_rating, max_rating = min(rating['Place_Ratings']), max(rating['Place_Ratings'])
+
+# Shuffle the dataset
+df = rating.sample(frac=1, random_state=42)
+
+# Prepare training and validation data
+x = df[['user', 'place']].values
+y = df['Place_Ratings'].apply(lambda x: (x - min_rating) / (max_rating - min_rating)).values
+train_indices = int(0.8 * df.shape[0])
+x_train, x_val, y_train, y_val = x[:train_indices], x[train_indices:], y[:train_indices], y[train_indices:]
+
+# Define the RecommenderNet model
+class RecommenderNet(tf.keras.Model):
+    def __init__(self, num_users, num_places, embedding_size, **kwargs):
+        super(RecommenderNet, self).__init__(**kwargs)
+        self.num_users = num_users
+        self.num_places = num_places
+        self.embedding_size = embedding_size
+        self.user_embedding = layers.Embedding(num_users, embedding_size, embeddings_initializer='he_normal', embeddings_regularizer=tf.keras.regularizers.l2(1e-6))
+        self.user_bias = layers.Embedding(num_users, 1)
+        self.places_embedding = layers.Embedding(num_places, embedding_size, embeddings_initializer='he_normal', embeddings_regularizer=tf.keras.regularizers.l2(1e-6))
+        self.places_bias = layers.Embedding(num_places, 1)
+
+    def call(self, inputs):
+        user_vector = self.user_embedding(inputs[:, 0])
+        user_bias = self.user_bias(inputs[:, 0])
+        places_vector = self.places_embedding(inputs[:, 1])
+        places_bias = self.places_bias(inputs[:, 1])
+        dot_user_places = tf.tensordot(user_vector, places_vector, 2)
+        x = dot_user_places + user_bias + places_bias
+        return tf.nn.sigmoid(x)
+
+model = RecommenderNet(num_users, num_place, 50)
+
+# Compile the model
+model.compile(loss=tf.keras.losses.BinaryCrossentropy(), optimizer=tf.keras.optimizers.Adam(learning_rate=0.0004), metrics=[tf.keras.metrics.RootMeanSquaredError()])
+
+# Train the model
+class myCallback(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        if logs.get('val_root_mean_squared_error') < 0.25:
+            print('Lapor! Metriks validasi sudah sesuai harapan')
+            self.model.stop_training = True
+
+history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val), callbacks=[myCallback()])
+
+
+
 # Tab pertama: Filter Tempat Wisata
 def filter_places():
     # Input user for name and age
