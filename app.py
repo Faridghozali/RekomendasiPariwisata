@@ -4,12 +4,15 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
-# Load data
-info_tourism = pd.read_csv("tourism_with_id.csv")
-# Make sure the data for visualizations is loaded, e.g.:
-# place = pd.read_csv("place_data.csv")
-# rating = pd.read_csv("rating_data.csv")
-# user = pd.read_csv("user_data.csv")
+
+# Load dataset
+def load_data():
+    rating = pd.read_csv('tourism_rating.csv')
+    place = pd.read_csv('tourism_with_id.csv')
+    user = pd.read_csv('user.csv')
+    return rating, place, user
+
+rating, place, user = load_data()
 
 # CSS for background images and custom styling
 page_bg_img = '''
@@ -41,20 +44,22 @@ body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
 # Apply CSS
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
+
+
 # Tab pertama: Filter Tempat Wisata
 def filter_places():
     # Input user for name and age
     name = st.text_input('Masukkan nama kamu:')
     age = st.number_input('Masukkan umur kamu:', min_value=10, max_value=100)
     
-    categories = st.selectbox('Kategori wisata', info_tourism['Category'].unique())
-    cities = st.selectbox('Lokasi kamu', info_tourism['City'].unique())
+    categories = st.selectbox('Kategori wisata', place ['Category'].unique())
+    cities = st.selectbox('Lokasi kamu', place ['City'].unique())
 
     # Tampilkan hasil filter hanya jika semua inputan sudah terisi
     if name and age and categories and cities:
         # Filter data berdasarkan input pengguna
-        filtered_data = info_tourism[(info_tourism['Category'] == categories) &
-                                     (info_tourism['City'] == cities)]
+        filtered_data = place [(place ['Category'] == categories) &
+                                     (place ['City'] == cities)]
 
         st.header(f'Daftar rekomendasi wisata untuk {name} yang berumur {age} tahun')
 
@@ -72,6 +77,47 @@ def filter_places():
             st.write(filtered_data_display[['Nama_Tempat', 'Kategori', 'Lokasi', 'Harga', 'Rating']])
     else:
         st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
+
+# Tab kedua: Filter Tempat Wisata
+def filter_by_user():
+    user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
+    
+    place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
+    place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
+    
+    place_visited_by_user = df[df.User_Id == user_id]
+    place_not_visited = place_df[~place_df['id'].isin(place_visited_by_user.Place_Id.values)]['id']
+    place_not_visited = list(set(place_not_visited).intersection(set(place_to_place_encoded.keys())))
+    place_not_visited = [[place_to_place_encoded.get(x)] for x in place_not_visited]
+    
+    user_encoder = user_to_user_encoded.get(user_id)
+    user_place_array = np.hstack(([[user_encoder]] * len(place_not_visited), place_not_visited))
+    
+    # Predict top 7 recommendations
+    ratings = model.predict(user_place_array).flatten()
+    top_ratings_indices = ratings.argsort()[-7:][::-1]
+    recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
+    
+    st.write(f"Daftar rekomendasi untuk: User {user_id}")
+    st.write("===" * 15)
+    st.write("----" * 15)
+    st.write("Tempat dengan rating wisata paling tinggi dari user")
+    st.write("----" * 15)
+    
+    top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
+    place_df_rows = place_df[place_df['id'].isin(top_place_user)]
+    for row in place_df_rows.itertuples():
+        st.write(f"{row.place_name} : {row.category}")
+    
+    st.write("----" * 15)
+    st.write("Top 7 place recommendation")
+    st.write("----" * 15)
+    
+    recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
+    for row, i in zip(recommended_place.itertuples(), range(1, 8)):
+        st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
+    
+    st.write("===" * 15)
 
 # Tab kedua: Visualisasi Data
 def visualisasi_data():
