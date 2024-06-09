@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import tensorflow as tf
 from tensorflow.keras import layers
-from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
 # Load dataset
 def load_data():
@@ -14,74 +13,42 @@ def load_data():
     user = pd.read_csv('user.csv')
     return rating, place, user
 
-rating, place, user = load_data()
+# Drop unnecessary columns and perform necessary preprocessing
+def preprocess_data(rating, place, user):
+    # CSS for background images and custom styling
+    page_bg_img = '''
+    <style>
+    .stApp {
+        background-image: url("https://islamic-center.or.id/wp-content/uploads/2016/07/Pariwisata-Halal-Indonesia.jpg");
+        background-size: cover;
+        background-position: center;
+    }
 
-# CSS for background images and custom styling
-page_bg_img = '''
-<style>
-.stApp {
-    background-image: url("https://islamic-center.or.id/wp-content/uploads/2016/07/Pariwisata-Halal-Indonesia.jpg");
-    background-size: cover;
-    background-position: center;
-}
+    /* Font color to black and bold */
+    body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
+        color: black;
+        font-weight: bold;
+    }
+    </style>
+    '''
+    st.markdown(page_bg_img, unsafe_allow_html=True)
 
-.stApp > header {
-    background-color: rgba(0,0,0,0);
-}
+    # Drop unnecessary columns
+    place = place.drop(['Unnamed: 11', 'Unnamed: 12', 'Time_Minutes'], axis=1)
 
-.css-1d391kg {
-    background-image: url("https://example.com/background_sidebar.jpg");
-    background-size: cover;
-    background-position: center;
-}
+    # Filter ratings for places 
+    rating = pd.merge(rating, place[['Place_Id']], how='right', on='Place_Id')
 
-/* Font color to black and bold */
-body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
-    color: black;
-    font-weight: bold;
-}
-</style>
-'''
+    # Shuffle the dataset
+    df = rating.sample(frac=1, random_state=42)
 
-# Apply CSS
-st.markdown(page_bg_img, unsafe_allow_html=True)
+    # Prepare training and validation data
+    x = df[['user', 'place']].values
+    y = df['Place_Ratings'].values.astype(np.float32)
+    train_indices = int(0.8 * df.shape[0])
+    x_train, x_val, y_train, y_val = x[:train_indices], x[train_indices:], y[:train_indices], y[train_indices:]
 
-# Drop unnecessary columns
-place = place.drop(['Unnamed: 11', 'Unnamed: 12'], axis=1)
-place = place.drop('Time_Minutes', axis=1)
-
-# Filter ratings for places 
-rating = pd.merge(rating, place[['Place_Id']], how='right', on='Place_Id')
-
-# Filter users who have visited places
-user = pd.merge(user, rating[['User_Id']], how='right', on='User_Id').drop_duplicates().sort_values('User_Id')
-
-# Encoding function
-def dict_encoder(col, data):
-    unique_val = data[col].unique().tolist()
-    val_to_val_encoded = {x: i for i, x in enumerate(unique_val)}
-    val_encoded_to_val = {i: x for i, x in enumerate(unique_val)}
-    return val_to_val_encoded, val_encoded_to_val
-
-# Encoding User_Id and Place_Id
-user_to_user_encoded, user_encoded_to_user = dict_encoder('User_Id', rating)
-place_to_place_encoded, place_encoded_to_place = dict_encoder('Place_Id', rating)
-
-rating['user'] = rating['User_Id'].map(user_to_user_encoded)
-rating['place'] = rating['Place_Id'].map(place_to_place_encoded)
-
-num_users, num_place = len(user_to_user_encoded), len(place_to_place_encoded)
-rating['Place_Ratings'] = rating['Place_Ratings'].values.astype(np.float32)
-min_rating, max_rating = min(rating['Place_Ratings']), max(rating['Place_Ratings'])
-
-# Shuffle the dataset
-df = rating.sample(frac=1, random_state=42)
-
-# Prepare training and validation data
-x = df[['user', 'place']].values
-y = df['Place_Ratings'].apply(lambda x: (x - min_rating) / (max_rating - min_rating)).values
-train_indices = int(0.8 * df.shape[0])
-x_train, x_val, y_train, y_val = x[:train_indices], x[train_indices:], y[:train_indices], y[train_indices:]
+    return df, x_train, x_val, y_train, y_val
 
 # Define the RecommenderNet model
 class RecommenderNet(tf.keras.Model):
@@ -104,53 +71,58 @@ class RecommenderNet(tf.keras.Model):
         x = dot_user_places + user_bias + places_bias
         return tf.nn.sigmoid(x)
 
-model = RecommenderNet(num_users, num_place, 50)
+# Main App
+def main():
+    rating, place, user = load_data()
+    df, x_train, x_val, y_train, y_val = preprocess_data(rating, place, user)
 
-# Compile the model
-model.compile(loss=tf.keras.losses.BinaryCrossentropy(), optimizer=tf.keras.optimizers.Adam(learning_rate=0.0004), metrics=[tf.keras.metrics.RootMeanSquaredError()])
+    # Define model
+    num_users = len(np.unique(df['user']))
+    num_places = len(np.unique(df['place']))
+    model = RecommenderNet(num_users, num_places, 50)
 
-# Train the model
-class myCallback(tf.keras.callbacks.Callback):
-    def on_epoch_end(self, epoch, logs=None):
-        if logs.get('val_root_mean_squared_error') < 0.25:
-            print('Lapor! Metriks validasi sudah sesuai harapan')
-            self.model.stop_training = True
+    # Compile model
+    model.compile(loss=tf.keras.losses.BinaryCrossentropy(), optimizer=tf.keras.optimizers.Adam(learning_rate=0.0004), metrics=[tf.keras.metrics.RootMeanSquaredError()])
 
-history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val), callbacks=[myCallback()])
+    # Train model
+    history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val))
 
-# Tab pertama: Filter Tempat Wisata
-def filter_places():
-    # Input user for name and age
-    name = st.text_input('Masukkan nama kamu:')
-    age = st.number_input('Masukkan umur kamu:', min_value=10, max_value=100)
-    
-    categories = st.selectbox('Kategori wisata', place['Category'].unique())
-    cities = st.selectbox('Lokasi kamu', place['City'].unique())
+    # Interface
+    st.title("Rekomendasi Tempat Wisata di Indonesia")
+    tabs = ["Sistem Rekomendasi Wisata", "Filter berdasarkan User", "Visualisasi Data"]
+    choice = st.sidebar.radio("Pilihan Menu", tabs)
 
-    # Tampilkan hasil filter hanya jika semua inputan sudah terisi
-    if name and age and categories and cities:
-        # Filter data berdasarkan input pengguna
-        filtered_data = place[(place['Category'] == categories) & (place['City'] == cities)]
+    if choice == "Sistem Rekomendasi Wisata":
+        # Input user for name and age
+        name = st.text_input('Masukkan nama kamu:')
+        age = st.number_input('Masukkan umur kamu:', min_value=10, max_value=100)
+        
+        categories = st.selectbox('Kategori wisata', place['Category'].unique())
+        cities = st.selectbox('Lokasi kamu', place['City'].unique())
 
-        st.header(f'Daftar rekomendasi wisata untuk {name} yang berumur {age} tahun')
+        # Tampilkan hasil filter hanya jika semua inputan sudah terisi
+        if name and age and categories and cities:
+            # Filter data berdasarkan input pengguna
+            filtered_data = place[(place['Category'] == categories) & (place['City'] == cities)]
 
-        if len(filtered_data) == 0:
-            st.write('Mohon maaf, tidak ada rekomendasi tempat wisata yang sesuai dengan preferensi Kamu saat ini.')
+            st.header(f'Daftar rekomendasi wisata untuk {name} yang berumur {age} tahun')
+
+            if len(filtered_data) == 0:
+                st.write('Mohon maaf, tidak ada rekomendasi tempat wisata yang sesuai dengan preferensi Kamu saat ini.')
+            else:
+                # Rename columns for display
+                filtered_data_display = filtered_data.rename(columns={
+                    'Place_Name': 'Nama_Tempat',
+                    'Category': 'Kategori',
+                    'City': 'Lokasi',
+                    'Price': 'Harga',
+                    'Rating': 'Rating'
+                })
+                st.write(filtered_data_display[['Nama_Tempat', 'Kategori', 'Lokasi', 'Harga', 'Rating']])
         else:
-            # Rename columns for display
-            filtered_data_display = filtered_data.rename(columns={
-                'Place_Name': 'Nama_Tempat',
-                'Category': 'Kategori',
-                'City': 'Lokasi',
-                'Price': 'Harga',
-                'Rating': 'Rating'
-            })
-            st.write(filtered_data_display[['Nama_Tempat', 'Kategori', 'Lokasi', 'Harga', 'Rating']])
-    else:
-        st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
-
-# Tab kedua: Filter berdasarkan User
-def filter_by_user():
+            st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
+            
+    elif choice == "Filter berdasarkan User":
     user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
     
     place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
@@ -190,8 +162,7 @@ def filter_by_user():
     
     st.write("===" * 15)
 
-# Tab ketiga: Visualisasi Data
-def visualisasi_data():
+elif choice == "Visualisasi Data":
     viz_choice = st.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
 
     if viz_choice == "Tempat Wisata Terpopuler":
@@ -236,16 +207,5 @@ def visualisasi_data():
         st.pyplot(plt)
 
 # Main App
-st.title("Rekomendasi Tempat Wisata di Indonesia")
-
-# Pilihan tab
-tabs = ["Sistem Rekomendasi Wisata", "Filter berdasarkan User", "Visualisasi Data"]
-choice = st.sidebar.radio("Pilihan Menu", tabs)
-
-# Tampilkan tab yang dipilih
-if choice == "Sistem Rekomendasi Wisata":
-    filter_places()
-elif choice == "Filter berdasarkan User":
-    filter_by_user()
-elif choice == "Visualisasi Data":
-    visualisasi_data()
+if __name__ == "__main__":
+    main()
