@@ -122,7 +122,7 @@ def main():
         else:
             st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
             
-    if choice == "Filter berdasarkan User":
+elif choice == "Filter berdasarkan User":
     user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
     
     place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
