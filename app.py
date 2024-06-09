@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
-
 
 # Load dataset
 def load_data():
@@ -44,22 +44,19 @@ body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
 # Apply CSS
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
-
-
 # Tab pertama: Filter Tempat Wisata
 def filter_places():
     # Input user for name and age
     name = st.text_input('Masukkan nama kamu:')
     age = st.number_input('Masukkan umur kamu:', min_value=10, max_value=100)
     
-    categories = st.selectbox('Kategori wisata', place ['Category'].unique())
-    cities = st.selectbox('Lokasi kamu', place ['City'].unique())
+    categories = st.selectbox('Kategori wisata', place['Category'].unique())
+    cities = st.selectbox('Lokasi kamu', place['City'].unique())
 
     # Tampilkan hasil filter hanya jika semua inputan sudah terisi
     if name and age and categories and cities:
         # Filter data berdasarkan input pengguna
-        filtered_data = place [(place ['Category'] == categories) &
-                                     (place ['City'] == cities)]
+        filtered_data = place[(place['Category'] == categories) & (place['City'] == cities)]
 
         st.header(f'Daftar rekomendasi wisata untuk {name} yang berumur {age} tahun')
 
@@ -78,14 +75,20 @@ def filter_places():
     else:
         st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
 
-# Tab kedua: Filter Tempat Wisata
+# Tab kedua: Filter berdasarkan User
 def filter_by_user():
     user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
     
     place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
     place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
     
-    place_visited_by_user = df[df.User_Id == user_id]
+    # Assuming place_to_place_encoded and user_to_user_encoded are precomputed dictionaries
+    # and model is a pre-trained recommendation model
+    place_to_place_encoded = {}  # Dummy placeholder
+    user_to_user_encoded = {}  # Dummy placeholder
+    model = None  # Dummy placeholder
+
+    place_visited_by_user = rating[rating.User_Id == user_id]
     place_not_visited = place_df[~place_df['id'].isin(place_visited_by_user.Place_Id.values)]['id']
     place_not_visited = list(set(place_not_visited).intersection(set(place_to_place_encoded.keys())))
     place_not_visited = [[place_to_place_encoded.get(x)] for x in place_not_visited]
@@ -96,7 +99,7 @@ def filter_by_user():
     # Predict top 7 recommendations
     ratings = model.predict(user_place_array).flatten()
     top_ratings_indices = ratings.argsort()[-7:][::-1]
-    recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
+    recommended_place_ids = [place_to_place_encoded.get(place_not_visited[x][0]) for x in top_ratings_indices]
     
     st.write(f"Daftar rekomendasi untuk: User {user_id}")
     st.write("===" * 15)
@@ -119,13 +122,13 @@ def filter_by_user():
     
     st.write("===" * 15)
 
-# Tab kedua: Visualisasi Data
+# Tab ketiga: Visualisasi Data
 def visualisasi_data():
     viz_choice = st.radio("Pilih Visualisasi:", ("Tempat Wisata Terpopuler", "Perbandingan Kategori Wisata", "Distribusi Usia User", "Distribusi Harga Tiket Masuk", "Asal Kota Pengunjung"))
 
     if viz_choice == "Tempat Wisata Terpopuler":
         # Tempat wisata dengan jumlah rating terbanyak
-        top_10 = rating['Place_Id'].value_counts().reset_index()[0:10]
+        top_10 = rating['Place_Id'].value_counts().reset_index().head(10)
         top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
         plt.figure(figsize=(8, 5))
         sns.barplot(x='index', y='Place_Id', data=top_10)
@@ -167,11 +170,13 @@ def visualisasi_data():
 st.title("Rekomendasi Tempat Wisata di Indonesia")
 
 # Pilihan tab
-tabs = ["Sistem Rekomendasi Wisata", "Visualisasi Data"]
+tabs = ["Sistem Rekomendasi Wisata", "Filter berdasarkan User", "Visualisasi Data"]
 choice = st.sidebar.radio("Pilihan Menu", tabs)
 
 # Tampilkan tab yang dipilih
 if choice == "Sistem Rekomendasi Wisata":
     filter_places()
+elif choice == "Filter berdasarkan User":
+    filter_by_user()
 elif choice == "Visualisasi Data":
     visualisasi_data()
