@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import tensorflow as tf
+from tensorflow.keras import layers
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
 # Load dataset
@@ -116,8 +118,6 @@ class myCallback(tf.keras.callbacks.Callback):
 
 history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val), callbacks=[myCallback()])
 
-
-
 # Tab pertama: Filter Tempat Wisata
 def filter_places():
     # Input user for name and age
@@ -156,13 +156,7 @@ def filter_by_user():
     place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
     place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
     
-    # Assuming place_to_place_encoded and user_to_user_encoded are precomputed dictionaries
-    # and model is a pre-trained recommendation model
-    place_to_place_encoded = {}  # Dummy placeholder
-    user_to_user_encoded = {}  # Dummy placeholder
-    model = None  # Dummy placeholder
-
-    place_visited_by_user = rating[rating.User_Id == user_id]
+    place_visited_by_user = df[df.User_Id == user_id]
     place_not_visited = place_df[~place_df['id'].isin(place_visited_by_user.Place_Id.values)]['id']
     place_not_visited = list(set(place_not_visited).intersection(set(place_to_place_encoded.keys())))
     place_not_visited = [[place_to_place_encoded.get(x)] for x in place_not_visited]
@@ -173,7 +167,7 @@ def filter_by_user():
     # Predict top 7 recommendations
     ratings = model.predict(user_place_array).flatten()
     top_ratings_indices = ratings.argsort()[-7:][::-1]
-    recommended_place_ids = [place_to_place_encoded.get(place_not_visited[x][0]) for x in top_ratings_indices]
+    recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
     
     st.write(f"Daftar rekomendasi untuk: User {user_id}")
     st.write("===" * 15)
@@ -205,7 +199,7 @@ def visualisasi_data():
         top_10 = rating['Place_Id'].value_counts().reset_index().head(10)
         top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
         plt.figure(figsize=(8, 5))
-        sns.barplot(x='index', y='Place_Id', data=top_10)
+        sns.barplot(x='Place_Name', y='Place_Id', data=top_10)
         plt.title('Jumlah Tempat Wisata dengan Rating Terbanyak', pad=20)
         plt.ylabel('Jumlah Rating')
         plt.xlabel('Nama Lokasi')
