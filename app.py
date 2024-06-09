@@ -151,10 +151,10 @@ def filter_places():
 
 # Tab kedua: Filter berdasarkan User
 def filter_by_user():
-     user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
+    user_id = st.selectbox("Pilih User ID", user['User_Id'].unique())
     
-    place_df = place[[Nama_Tempat', 'Kategori', 'Lokasi', 'Harga', 'Rating']]
-    place_df.columns = ['id', Nama_Tempat', 'Kategori', 'Rating',  'Harga']
+    place_df = place[['Place_Id', 'Place_Name', 'Category', 'Rating', 'Price']]
+    place_df.columns = ['id', 'place_name', 'category', 'rating', 'price']
     
     place_visited_by_user = df[df.User_Id == user_id]
     place_not_visited = place_df[~place_df['id'].isin(place_visited_by_user.Place_Id.values)]['id']
@@ -189,8 +189,6 @@ def filter_by_user():
         st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
     
     st.write("===" * 15)
-   
-
 
 # Tab ketiga: Visualisasi Data
 def visualisasi_data():
@@ -200,8 +198,9 @@ def visualisasi_data():
         # Tempat wisata dengan jumlah rating terbanyak
         top_10 = rating['Place_Id'].value_counts().reset_index().head(10)
         top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
+        top_10.columns = ['Place_Id', 'Jumlah_Rating', 'Place_Name']
         plt.figure(figsize=(8, 5))
-        sns.barplot(x='Place_Name', y='Place_Id', data=top_10)
+        sns.barplot(x='Place_Name', y='Jumlah_Rating', data=top_10)
         plt.title('Jumlah Tempat Wisata dengan Rating Terbanyak', pad=20)
         plt.ylabel('Jumlah Rating')
         plt.xlabel('Nama Lokasi')
