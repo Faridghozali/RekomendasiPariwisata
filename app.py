@@ -118,36 +118,7 @@ class myCallback(tf.keras.callbacks.Callback):
 
 history = model.fit(x_train, y_train, epochs=100, validation_data=(x_val, y_val), callbacks=[myCallback()])
 
-# Tab pertama: Filter Tempat Wisata
-def filter_places():
-    # Input user for name and age
-    name = st.text_input('Masukkan nama kamu:')
-    age = st.number_input('Masukkan umur kamu:', min_value=10, max_value=100)
-    
-    categories = st.selectbox('Kategori wisata', place['Category'].unique())
-    cities = st.selectbox('Lokasi kamu', place['City'].unique())
 
-    # Tampilkan hasil filter hanya jika semua inputan sudah terisi
-    if name and age and categories and cities:
-        # Filter data berdasarkan input pengguna
-        filtered_data = place[(place['Category'] == categories) & (place['City'] == cities)]
-
-        st.header(f'Daftar rekomendasi wisata untuk {name} yang berumur {age} tahun')
-
-        if len(filtered_data) == 0:
-            st.write('Mohon maaf, tidak ada rekomendasi tempat wisata yang sesuai dengan preferensi Kamu saat ini.')
-        else:
-            # Rename columns for display
-            filtered_data_display = filtered_data.rename(columns={
-                'Place_Name': 'Nama_Tempat',
-                'Category': 'Kategori',
-                'City': 'Lokasi',
-                'Price': 'Harga',
-                'Rating': 'Rating'
-            })
-            st.write(filtered_data_display[['Nama_Tempat', 'Kategori', 'Lokasi', 'Harga', 'Rating']])
-    else:
-        st.write('Silakan lengkapi semua input untuk melihat rekomendasi tempat wisata.')
 
 # Tab kedua: Filter berdasarkan User
 def filter_by_user():
