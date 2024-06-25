@@ -8,7 +8,6 @@ from tensorflow.keras import layers
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
 # Load dataset
-@st.cache
 def load_data():
     rating = pd.read_csv('tourism_rating.csv')
     place = pd.read_csv('tourism_with_id.csv')
@@ -25,14 +24,17 @@ page_bg_img = '''
     background-size: cover;
     background-position: center;
 }
+
 .stApp > header {
     background-color: rgba(0,0,0,0);
 }
+
 .css-1d391kg {
     background-image: url("https://example.com/background_sidebar.jpg");
     background-size: cover;
     background-position: center;
 }
+
 /* Font color to black and bold */
 body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
     color: black;
@@ -45,10 +47,8 @@ body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # Drop unnecessary columns
-if 'Unnamed: 11' in place.columns and 'Unnamed: 12' in place.columns:
-    place = place.drop(['Unnamed: 11', 'Unnamed: 12'], axis=1)
-if 'Time_Minutes' in place.columns:
-    place = place.drop('Time_Minutes', axis=1)
+place = place.drop(['Unnamed: 11', 'Unnamed: 12'], axis=1)
+place = place.drop('Time_Minutes', axis=1)
 
 # Filter ratings for places 
 rating = pd.merge(rating, place[['Place_Id']], how='right', on='Place_Id')
@@ -85,8 +85,8 @@ x_train, x_val, y_train, y_val = x[:train_indices], x[train_indices:], y[:train_
 
 # Define the RecommenderNet model
 class RecommenderNet(tf.keras.Model):
-    def __init__(self, num_users, num_places, embedding_size, **kwargs):
-        super(RecommenderNet, self).__init__(**kwargs)
+    def _init_(self, num_users, num_places, embedding_size, **kwargs):
+        super(RecommenderNet, self)._init_(**kwargs)
         self.num_users = num_users
         self.num_places = num_places
         self.embedding_size = embedding_size
@@ -164,12 +164,9 @@ def filter_by_user():
     user_encoder = user_to_user_encoded.get(user_id)
     user_place_array = np.hstack(([[user_encoder]] * len(place_not_visited), place_not_visited))
     
-    # Tambahkan slider untuk memilih jumlah rekomendasi
-    num_recommendations = st.slider('Pilih jumlah rekomendasi', min_value=2, max_value=10, value=7)
-    
-    # Predict top N recommendations
+    # Predict top 7 recommendations
     ratings = model.predict(user_place_array).flatten()
-    top_ratings_indices = ratings.argsort()[-num_recommendations:][::-1]
+    top_ratings_indices = ratings.argsort()[-7:][::-1]
     recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
     
     st.write(f"Daftar rekomendasi untuk: User {user_id}")
@@ -177,21 +174,24 @@ def filter_by_user():
     st.write("----" * 15)
     st.write("Tempat dengan rating wisata paling tinggi dari user")
     st.write("----" * 15)
-    
-    top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
+
+ top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
     place_df_rows = place_df[place_df['id'].isin(top_place_user)]
     for row in place_df_rows.itertuples():
         st.write(f"{row.place_name} : {row.category}")
-    
-    st.write("----" * 15)
-    st.write(f"Top {num_recommendations} place recommendation")
+
+ st.write("----" * 15)
+    st.write("Top 7 place recommendation")
     st.write("----" * 15)
     
     recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
-    for row, i in zip(recommended_place.itertuples(), range(1, num_recommendations + 1)):
+    for row, i in zip(recommended_place.itertuples(), range(1, 8)):
         st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
     
     st.write("===" * 15)
+    
+   
+
 
 # Tab ketiga: Visualisasi Data
 def visualisasi_data():
@@ -201,9 +201,8 @@ def visualisasi_data():
         # Tempat wisata dengan jumlah rating terbanyak
         top_10 = rating['Place_Id'].value_counts().reset_index().head(10)
         top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
-        top_10.columns = ['Place_Id', 'Jumlah_Rating', 'Place_Name']
         plt.figure(figsize=(8, 5))
-        sns.barplot(x='Place_Name', y='Jumlah_Rating', data=top_10)
+        sns.barplot(x='Place_Name', y='Place_Id', data=top_10)
         plt.title('Jumlah Tempat Wisata dengan Rating Terbanyak', pad=20)
         plt.ylabel('Jumlah Rating')
         plt.xlabel('Nama Lokasi')
