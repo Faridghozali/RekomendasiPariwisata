@@ -8,6 +8,7 @@ from tensorflow.keras import layers
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
 # Load dataset
+@st.cache
 def load_data():
     rating = pd.read_csv('tourism_rating.csv')
     place = pd.read_csv('tourism_with_id.csv')
@@ -24,17 +25,14 @@ page_bg_img = '''
     background-size: cover;
     background-position: center;
 }
-
 .stApp > header {
     background-color: rgba(0,0,0,0);
 }
-
 .css-1d391kg {
     background-image: url("https://example.com/background_sidebar.jpg");
     background-size: cover;
     background-position: center;
 }
-
 /* Font color to black and bold */
 body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
     color: black;
@@ -47,8 +45,10 @@ body, .css-10trblm, .css-1v3fvcr, .stText, .stNumberInput, .stSelectbox {
 st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # Drop unnecessary columns
-place = place.drop(['Unnamed: 11', 'Unnamed: 12'], axis=1)
-place = place.drop('Time_Minutes', axis=1)
+if 'Unnamed: 11' in place.columns and 'Unnamed: 12' in place.columns:
+    place = place.drop(['Unnamed: 11', 'Unnamed: 12'], axis=1)
+if 'Time_Minutes' in place.columns:
+    place = place.drop('Time_Minutes', axis=1)
 
 # Filter ratings for places 
 rating = pd.merge(rating, place[['Place_Id']], how='right', on='Place_Id')
@@ -192,8 +192,6 @@ def filter_by_user():
         st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
     
     st.write("===" * 15)
-
-
 
 # Tab ketiga: Visualisasi Data
 def visualisasi_data():
