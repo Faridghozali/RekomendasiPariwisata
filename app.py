@@ -164,9 +164,12 @@ def filter_by_user():
     user_encoder = user_to_user_encoded.get(user_id)
     user_place_array = np.hstack(([[user_encoder]] * len(place_not_visited), place_not_visited))
     
-    # Predict top 7 recommendations
+    # Tambahkan slider untuk memilih jumlah rekomendasi
+    num_recommendations = st.slider('Pilih jumlah rekomendasi', min_value=2, max_value=10, value=7)
+    
+    # Predict top N recommendations
     ratings = model.predict(user_place_array).flatten()
-    top_ratings_indices = ratings.argsort()[-7:][::-1]
+    top_ratings_indices = ratings.argsort()[-num_recommendations:][::-1]
     recommended_place_ids = [place_encoded_to_place.get(place_not_visited[x][0]) for x in top_ratings_indices]
     
     st.write(f"Daftar rekomendasi untuk: User {user_id}")
@@ -181,14 +184,16 @@ def filter_by_user():
         st.write(f"{row.place_name} : {row.category}")
     
     st.write("----" * 15)
-    st.write("Top 7 place recommendation")
+    st.write(f"Top {num_recommendations} place recommendation")
     st.write("----" * 15)
     
     recommended_place = place_df[place_df['id'].isin(recommended_place_ids)]
-    for row, i in zip(recommended_place.itertuples(), range(1, 8)):
+    for row, i in zip(recommended_place.itertuples(), range(1, num_recommendations + 1)):
         st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
     
     st.write("===" * 15)
+
+
 
 # Tab ketiga: Visualisasi Data
 def visualisasi_data():
