@@ -85,8 +85,8 @@ x_train, x_val, y_train, y_val = x[:train_indices], x[train_indices:], y[:train_
 
 # Define the RecommenderNet model
 class RecommenderNet(tf.keras.Model):
-    def _init_(self, num_users, num_places, embedding_size, **kwargs):
-        super(RecommenderNet, self)._init_(**kwargs)
+    def __init__(self, num_users, num_places, embedding_size, **kwargs):
+        super(RecommenderNet, self).__init__(**kwargs)
         self.num_users = num_users
         self.num_places = num_places
         self.embedding_size = embedding_size
@@ -174,13 +174,13 @@ def filter_by_user():
     st.write("----" * 15)
     st.write("Tempat dengan rating wisata paling tinggi dari user")
     st.write("----" * 15)
-
- top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
+    
+    top_place_user = place_visited_by_user.sort_values(by='Place_Ratings', ascending=False).head(5).Place_Id.values
     place_df_rows = place_df[place_df['id'].isin(top_place_user)]
     for row in place_df_rows.itertuples():
         st.write(f"{row.place_name} : {row.category}")
-
- st.write("----" * 15)
+    
+    st.write("----" * 15)
     st.write("Top 7 place recommendation")
     st.write("----" * 15)
     
@@ -189,7 +189,6 @@ def filter_by_user():
         st.write(f"{i}. {row.place_name}\n    {row.category}, Harga Tiket Masuk {row.price}, Rating Wisata {row.rating}\n")
     
     st.write("===" * 15)
-    
 
 # Tab ketiga: Visualisasi Data
 def visualisasi_data():
@@ -199,8 +198,9 @@ def visualisasi_data():
         # Tempat wisata dengan jumlah rating terbanyak
         top_10 = rating['Place_Id'].value_counts().reset_index().head(10)
         top_10 = pd.merge(top_10, place[['Place_Id', 'Place_Name']], how='left', left_on='Place_Id', right_on='Place_Id')
+        top_10.columns = ['Place_Id', 'Jumlah_Rating', 'Place_Name']
         plt.figure(figsize=(8, 5))
-        sns.barplot(x='Place_Name', y='Place_Id', data=top_10)
+        sns.barplot(x='Place_Name', y='Jumlah_Rating', data=top_10)
         plt.title('Jumlah Tempat Wisata dengan Rating Terbanyak', pad=20)
         plt.ylabel('Jumlah Rating')
         plt.xlabel('Nama Lokasi')
